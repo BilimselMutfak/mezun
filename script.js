@@ -9,7 +9,7 @@
 // ========================================================
 
 // BURAYA KENDİ SUPABASE PROJECT URL'NİZİ YAZIN
-const SUPABASE_URL = "https://SIZIN-PROJE-ID.supabase.co";
+const SUPABASE_URL = "https://yevbibgsmhxgbtutgbmv.supabase.co";
 
 // BURAYA SUPABASE ANON / PUBLIC KEY'İNİZİ YAZIN
 const SUPABASE_ANON_KEY = "sb_publishable_tbGnRoLOSgvQWeyoPSVj0A_tWA2RD88";
