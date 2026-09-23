@@ -15,7 +15,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
 
 
 // Supabase bağlantısını oluştur
-const supabase = window.supabase.createClient(
+window. supabase = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
