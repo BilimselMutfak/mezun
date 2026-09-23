@@ -1,98 +1,96 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Basit Mezun Öğrenci Portalı">
-  <title>Mezun Öğrenci Portalı</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mezun Öğrenci Portalı</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">🎓</div>
-      <div>
-        <h1>Mezun Öğrenci Portalı</h1>
-        <p>Mezunlarımızla bağlantıda kalın</p>
-      </div>
+    <div class="container">
+        <header>
+            <h1>🎓 Mezun Öğrenci Portalı</h1>
+            <p>Mezunlarımızla bağlantıda kalın</p>
+            <button id="theme-toggle" class="theme-btn">☾</button>
+        </header>
+
+        <main>
+            <section class="intro-section">
+                <h2>MEZUNLARIMIZ</h2>
+                <p class="subtitle">Mezun topluluğumuzu keşfedin.</p>
+                <p>Mezunlarımızı ad, bölüm, yıl, şehir ve çalışma durumuna göre hızlıca arayın.</p>
+            </section>
+
+            <section class="search-section">
+                <h3>🎓 Mezunları Ara</h3>
+                
+                <!-- Google Form Kayıt Butonu Başlangıcı -->
+                <div class="register-container">
+                    <a href="https://forms.gle/gUqhDcahoXYsw2f7A" target="_blank" class="register-btn">
+                        ➕ Kendini Sisteme Ekle (Kayıt Ol)
+                    </a>
+                </div>
+                <!-- Google Form Kayıt Butonu Bitişi -->
+
+                <div class="filter-controls">
+                    <span id="results-count" class="results-count">Tüm mezunlar gösteriliyor.</span>
+                    <button id="clear-filters" class="clear-btn">Filtreleri Temizle</button>
+                </div>
+
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="search-input">🔎 Arama</label>
+                        <input type="text" id="search-input" placeholder="İsim ile ara...">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="dept-filter">Bölüm</label>
+                        <select id="dept-filter">
+                            <option value="">Tüm bölümler</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="year-filter">Mezuniyet Yılı</label>
+                        <select id="year-filter">
+                            <option value="">Tüm yıllar</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="city-filter">Şehir</label>
+                        <select id="city-filter">
+                            <option value="">Tüm şehirler</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="status-filter">Durum</label>
+                        <select id="status-filter">
+                            <option value="">Tümü</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-section">
+                <div id="alumni-container" class="alumni-grid">
+                    <!-- Kartlar JavaScript ile buraya yüklenecektir -->
+                </div>
+                <div id="no-results" class="no-results hidden">
+                    <span class="no-results-icon">🔎</span>
+                    <h3>Mezun bulunamadı</h3>
+                    <p>Arama veya filtre kriterlerinizi değiştirmeyi deneyin.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Mezun Öğrenci Portalı · GitHub Pages uyumlu</p>
+        </footer>
     </div>
-    <button id="themeBtn" class="icon-btn" title="Tema değiştir">☾</button>
-  </header>
 
-  <main class="container">
-    <section class="hero">
-      <div>
-        <span class="eyebrow">MEZUNLARIMIZ</span>
-        <h2>Mezun topluluğumuzu keşfedin.</h2>
-        <p>Mezunlarımızı ad, bölüm, yıl, şehir ve çalışma durumuna göre hızlıca arayın.</p>
-      </div>
-      <div class="hero-badge">🎓</div>
-    </section>
-
-    <section class="stats" id="stats"></section>
-
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h3>Mezunları Ara</h3>
-          <p id="resultText">Tüm mezunlar gösteriliyor.</p>
-        </div>
-        <button id="resetBtn" class="secondary-btn">Filtreleri Temizle</button>
-      </div>
-
-      <div class="filters">
-        <label>
-          Arama
-          <input id="searchInput" type="search" placeholder="Ad, bölüm, sektör...">
-        </label>
-        <label>
-          Bölüm
-          <select id="departmentFilter">
-            <option value="">Tüm bölümler</option>
-          </select>
-        </label>
-        <label>
-          Mezuniyet Yılı
-          <select id="yearFilter">
-            <option value="">Tüm yıllar</option>
-          </select>
-        </label>
-        <label>
-          Şehir
-          <select id="cityFilter">
-            <option value="">Tüm şehirler</option>
-          </select>
-        </label>
-        <label>
-          Durum
-          <select id="statusFilter">
-            <option value="">Tümü</option>
-          </select>
-        </label>
-      </div>
-    </section>
-
-    <section id="graduates" class="graduates"></section>
-
-    <div id="emptyState" class="empty hidden">
-      <div>🔎</div>
-      <h3>Mezun bulunamadı</h3>
-      <p>Arama veya filtre kriterlerinizi değiştirmeyi deneyin.</p>
-    </div>
-  </main>
-
-  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button id="closeModal" class="close-btn" aria-label="Kapat">×</button>
-      <div id="modalContent"></div>
-    </div>
-  </div>
-
-  <footer>
-    <p>© 2026 Mezun Öğrenci Portalı · GitHub Pages uyumlu</p>
-  </footer>
-
-  <script src="data.js"></script>
-  <script src="script.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
