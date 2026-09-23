@@ -13,4 +13,14 @@ const mezunlar = [
   { id: 10, ad: "Selin Yıldız", bolum: "Turizm Rehberliği", yil: 2021, sehir: "Nevşehir", sektor: "Turizm", durum: "Çalışıyor", kurum: "Kapadokya Tur", unvan: "Turist Rehberi" },
   { id: 11, ad: "Oğuz Kılıç", bolum: "Turizm İşletmeciliği", yil: 2019, sehir: "Bodrum", sektor: "Konaklama", durum: "Çalışıyor", kurum: "Bodrum Hotel", unvan: "Genel Müdür Yardımcısı" },
   { id: 12, ad: "Merve Erdem", bolum: "Gastronomi ve Mutfak Sanatları", yil: 2025, sehir: "İzmir", sektor: "Akademi", durum: "Lisansüstü Eğitim", kurum: "Ege Üniversitesi", unvan: "Yüksek Lisans Öğrencisi" }
+  {
+    id: "00923151",
+    name: "YUSUF YIGIT",
+    dept: "Aşçılık",
+    year: 1995,
+    city: "Mugla",
+    status: "Çalışıyor",
+    company: "Muğla Üniversitesi",
+    job: "Aşçı Şef Dr."
+  },
 ];
