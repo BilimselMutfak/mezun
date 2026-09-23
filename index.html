@@ -1,777 +1,166 @@
 <!DOCTYPE html>
 <html lang="tr">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="description"
-        content="Dinamik Mezun Öğrenci Portalı"
-    >
-
-    <meta
-        name="theme-color"
-        content="#b91c1c"
-    >
-
-    <title>
-        Mezun Öğrenci Portalı
-    </title>
-
-
-    <!-- ==================================================
-         CSS
-    =================================================== -->
-
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-    <script type="module" src="supabase.js"></script>
-
-    <!-- ==================================================
-         SUPABASE JAVASCRIPT KÜTÜPHANESİ
-         ÖNEMLİ: script.js'den ÖNCE yüklenmelidir.
-    =================================================== -->
-
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dinamik Mezun Öğrenci Portalı">
+  <title>Mezun Öğrenci Portalı</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
-
-
-    <!-- ==================================================
-         ÜST MENÜ
-    =================================================== -->
-
-    <header class="topbar">
-
-        <div class="brand">
-
-            <div class="logo">
-                🎓
-            </div>
-
-            <div>
-
-                <h1>
-                    Mezun Öğrenci Portalı
-                </h1>
-
-                <p>
-                    Mezunlarımızla bağlantıda kalın
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <button
-            id="themeBtn"
-            class="icon-btn"
-            title="Tema değiştir"
-            type="button"
-            aria-label="Tema değiştir"
-        >
-            ☾
-        </button>
-
-    </header>
-
-
-
-    <!-- ==================================================
-         ANA İÇERİK
-    =================================================== -->
-
-    <main class="container">
-
-
-        <!-- ==================================================
-             HERO
-        =================================================== -->
-
-        <section class="hero">
-
-            <div>
-
-                <span class="eyebrow">
-                    MEZUNLARIMIZ
-                </span>
-
-                <h2>
-                    Mezun topluluğumuzu keşfedin.
-                </h2>
-
-                <p>
-                    Mezunlarımızı ad, bölüm, yıl, şehir ve
-                    çalışma durumuna göre hızlıca arayın.
-                </p>
-
-            </div>
-
-
-            <div class="hero-badge">
-                🎓
-            </div>
-
-        </section>
-
-
-
-        <!-- ==================================================
-             İSTATİSTİKLER
-             script.js burayı otomatik dolduracaktır.
-        =================================================== -->
-
-        <section
-            class="stats"
-            id="stats"
-        >
-
-            <div class="stat">
-
-                <div class="number">
-                    0
-                </div>
-
-                <div class="label">
-                    Toplam Mezun
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="number">
-                    0
-                </div>
-
-                <div class="label">
-                    Çalışan Mezun
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="number">
-                    0
-                </div>
-
-                <div class="label">
-                    Aktif Bölüm
-                </div>
-
-            </div>
-
-
-            <div class="stat">
-
-                <div class="number">
-                    0
-                </div>
-
-                <div class="label">
-                    Farklı Şehir
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- ==================================================
-             ARAMA VE FİLTRE PANELİ
-        =================================================== -->
-
-        <section class="panel">
-
-
-            <div class="panel-head">
-
-                <div>
-
-                    <h3>
-                        Mezunları Ara
-                    </h3>
-
-                    <p id="resultText">
-                        Veriler yükleniyor...
-                    </p>
-
-                </div>
-
-
-                <div
-                    style="
-                        display:flex;
-                        gap:10px;
-                        flex-wrap:wrap;
-                        align-items:center;
-                    "
-                >
-
-
-                    <!-- ==================================================
-                         GOOGLE FORM KAYIT BUTONU
-                    =================================================== -->
-
-                    <a
-                        href="https://forms.gle/BCAcJtjFhgZ4FPXK8"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="primary-action-btn"
-                    >
-                        ➕ Kendini Sisteme Ekle (Kayıt Ol)
-                    </a>
-
-
-                    <!-- FİLTRELERİ TEMİZLE -->
-
-                    <button
-                        id="resetBtn"
-                        class="secondary-btn"
-                        type="button"
-                    >
-                        Filtreleri Temizle
-                    </button>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- ==================================================
-                 FİLTRELER
-            =================================================== -->
-
-            <div class="filters">
-
-
-                <!-- ARAMA -->
-
-                <label>
-
-                    Arama
-
-                    <input
-                        id="searchInput"
-                        type="search"
-                        placeholder="Ad, bölüm, sektör..."
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-
-                <!-- BÖLÜM -->
-
-                <label>
-
-                    Bölüm
-
-                    <select id="departmentFilter">
-
-                        <option value="">
-                            Tüm bölümler
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- MEZUNİYET YILI -->
-
-                <label>
-
-                    Mezuniyet Yılı
-
-                    <select id="yearFilter">
-
-                        <option value="">
-                            Tüm yıllar
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- ŞEHİR -->
-
-                <label>
-
-                    Şehir
-
-                    <select id="cityFilter">
-
-                        <option value="">
-                            Tüm şehirler
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- DURUM -->
-
-                <label>
-
-                    Durum
-
-                    <select id="statusFilter">
-
-                        <option value="">
-                            Tümü
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-            </div>
-
-        </section>
-
-
-
-        <!-- ==================================================
-             MEZUN KARTLARI
-             script.js buraya kartları ekleyecek.
-        =================================================== -->
-
-        <section
-            id="graduates"
-            class="graduates"
-            aria-live="polite"
-        ></section>
-
-
-
-        <!-- ==================================================
-             SONUÇ BULUNAMADI
-        =================================================== -->
-
-        <div
-            id="emptyState"
-            class="empty hidden"
-        >
-
-            <div>
-                🔎
-            </div>
-
-            <h3>
-                Mezun bulunamadı
-            </h3>
-
-            <p>
-                Arama veya filtre kriterlerinizi
-                değiştirmeyi deneyin.
-            </p>
-
-        </div>
-
-
-    </main>
-
-
-
-    <!-- ==================================================
-         MEZUN DETAY MODALI
-    =================================================== -->
-
-    <div
-        id="modal"
-        class="modal hidden"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modalContent"
-    >
-
-        <div class="modal-card">
-
-
-            <button
-                id="closeModal"
-                class="close-btn"
-                type="button"
-                aria-label="Kapat"
-            >
-                ×
-            </button>
-
-
-            <div id="modalContent"></div>
-
-
-        </div>
-
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🎓</div>
+      <div>
+        <h1>Mezun Öğrenci Portalı</h1>
+        <p>Mezunlarımızla bağlantıda kalın</p>
+      </div>
     </div>
-
-
-
-    <!-- ==================================================
-         ADMİN PANELİ MODALI
-    =================================================== -->
-
-    <div
-        id="adminModal"
-        class="modal hidden"
-        role="dialog"
-        aria-modal="true"
-    >
-
-        <div
-            class="modal-card"
-            style="width:min(600px,100%);"
-        >
-
-
-            <!-- KAPAT -->
-
-            <button
-                id="closeAdminModal"
-                class="close-btn"
-                type="button"
-                aria-label="Kapat"
-            >
-                ×
-            </button>
-
-
-
-            <!-- BAŞLIK -->
-
-            <h3
-                style="
-                    margin-top:0;
-                    font-size:20px;
-                "
-            >
-                ⚙️ Canlı Yönetici Paneli
-            </h3>
-
-
-
-            <p
-                style="
-                    color:var(--muted);
-                    font-size:13px;
-                    margin-bottom:15px;
-                    line-height:1.4;
-                "
-            >
-                Form alanlarını doldurup
-                "Veritabanına Doğrudan Kaydet"
-                butonuna bastığınızda veriler
-                Supabase bulut veritabanınıza
-                anında kaydedilir.
-            </p>
-
-
-
-            <!-- ==================================================
-                 ADMİN FORMU
-            =================================================== -->
-
-            <div
-                style="
-                    display:grid;
-                    grid-template-columns:repeat(2,1fr);
-                    gap:12px;
-                    margin-bottom:15px;
-                    text-align:left;
-                "
-            >
-
-
-                <!-- AD SOYAD -->
-
-                <label>
-
-                    Adı Soyadı *
-
-                    <input
-                        type="text"
-                        id="admName"
-                        placeholder="Örn: Ahmet Yılmaz"
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-
-                <!-- BÖLÜM -->
-
-                <label>
-
-                    Bölümü *
-
-                    <select id="admDept">
-
-                        <option value="">
-                            Bölüm seçiniz
-                        </option>
-
-                        <option value="Gastronomi ve Mutfak Sanatları">
-                            Gastronomi ve Mutfak Sanatları
-                        </option>
-
-                        <option value="Turizm İşletmeciliği">
-                            Turizm İşletmeciliği
-                        </option>
-
-                        <option value="Turizm Rehberliği">
-                            Turizm Rehberliği
-                        </option>
-
-                        <option value="Yiyecek ve İçecek İşletmeciliği">
-                            Yiyecek ve İçecek İşletmeciliği
-                        </option>
-
-                        <option value="Aşçılık">
-                            Aşçılık
-                        </option>
-
-                        <option value="Muhasebe">
-                            Muhasebe
-                        </option>
-
-                        <option value="Marina">
-                            Marina
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- MEZUNİYET YILI -->
-
-                <label>
-
-                    Mezuniyet Yılı *
-
-                    <input
-                        type="number"
-                        id="admYear"
-                        min="1900"
-                        max="2100"
-                        placeholder="Örn: 2024"
-                    >
-
-                </label>
-
-
-
-                <!-- ŞEHİR -->
-
-                <label>
-
-                    Bulunduğu Şehir *
-
-                    <input
-                        type="text"
-                        id="admCity"
-                        placeholder="Örn: İstanbul"
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-
-                <!-- SEKTÖR -->
-
-                <label>
-
-                    Sektör *
-
-                    <input
-                        type="text"
-                        id="admSektor"
-                        placeholder="Örn: Yiyecek ve İçecek"
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-
-                <!-- DURUM -->
-
-                <label>
-
-                    Çalışma Durumu *
-
-                    <select id="admStatus">
-
-                        <option value="">
-                            Durum seçiniz
-                        </option>
-
-                        <option value="Çalışıyor">
-                            Çalışıyor
-                        </option>
-
-                        <option value="Çalışmıyor">
-                            Çalışmıyor
-                        </option>
-
-                        <option value="Girişimci">
-                            Girişimci
-                        </option>
-
-                        <option value="Lisansüstü Eğitim">
-                            Lisansüstü Eğitim
-                        </option>
-
-                    </select>
-
-                </label>
-
-
-
-                <!-- KURUM -->
-
-                <label
-                    style="grid-column:span 2;"
-                >
-
-                    Çalıştığı Kurum veya Şirket *
-
-                    <input
-                        type="text"
-                        id="admCompany"
-                        placeholder="Örn: ABC Gastronomi"
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-
-                <!-- UNVAN -->
-
-                <label
-                    style="grid-column:span 2;"
-                >
-
-                    Unvan / Görevi *
-
-                    <input
-                        type="text"
-                        id="admJob"
-                        placeholder="Örn: Şef"
-                        autocomplete="off"
-                    >
-
-                </label>
-
-
-            </div>
-
-
-
-            <!-- ==================================================
-                 VERİTABANINA KAYDET
-            =================================================== -->
-
-            <button
-                id="btnSaveToDatabase"
-                type="button"
-                style="
-                    width:100%;
-                    background:#238636;
-                    color:white;
-                    border:0;
-                    padding:14px;
-                    border-radius:10px;
-                    font-weight:bold;
-                    cursor:pointer;
-                    font-size:14px;
-                    transition:background 0.2s;
-                "
-            >
-                💾 Veritabanına Doğrudan Kaydet (Kalıcı)
-            </button>
-
-
+    <button id="themeBtn" class="icon-btn" title="Tema değiştir">☾</button>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">MEZUNLARIMIZ</span>
+        <h2>Mezun topluluğumuzu keşfedin.</h2>
+        <p>Mezunlarımızı ad, bölüm, yıl, şehir ve çalışma durumuna göre hızlıca arayın.</p>
+      </div>
+      <div class="hero-badge">🎓</div>
+    </section>
+
+    <!-- Dinamik İstatistik Alanı -->
+    <section class="stats" id="stats">
+      <div class="stat">
+        <div class="number" id="stat-total">0</div>
+        <div class="label">Toplam Mezun</div>
+      </div>
+      <div class="stat">
+        <div class="number" id="stat-working">0</div>
+        <div class="label">Çalışan Mezun</div>
+      </div>
+      <div class="stat">
+        <div class="number" id="stat-departments">0</div>
+        <div class="label">Aktif Bölüm</div>
+      </div>
+      <div class="stat">
+        <div class="number" id="stat-cities">0</div>
+        <div class="label">Farklı Şehir</div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Mezunları Ara</h3>
+          <p id="resultText">Yükleniyor...</p>
         </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <a href="https://forms.gle" target="_blank" class="primary-action-btn">
+            ➕ Kendini Sisteme Ekle (Kayıt Ol)
+          </a>
+          <button id="resetBtn" class="secondary-btn">Filtreleri Temizle</button>
+        </div>
+      </div>
 
+      <div class="filters">
+        <label>
+          Arama
+          <input id="searchInput" type="search" placeholder="Ad, bölüm, sektör...">
+        </label>
+        <label>
+          Bölüm
+          <select id="departmentFilter">
+            <option value="">Tüm bölümler</option>
+          </select>
+        </label>
+        <label>
+          Mezuniyet Yılı
+          <select id="yearFilter">
+            <option value="">Tüm yıllar</option>
+          </select>
+        </label>
+        <label>
+          Şehir
+          <select id="cityFilter">
+            <option value="">Tüm şehirler</option>
+          </select>
+        </label>
+        <label>
+          Durum
+          <select id="statusFilter">
+            <option value="">Tümü</option>
+          </select>
+        </label>
+      </div>
+    </section>
+
+    <section id="graduates" class="graduates"></section>
+
+    <div id="emptyState" class="empty hidden">
+      <div>🔎</div>
+      <h3>Mezun bulunamadı</h3>
+      <p>Arama veya filtre kriterlerinizi değiştirmeyi deneyin.</p>
     </div>
+  </main>
 
+  <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <button id="closeModal" class="close-btn" aria-label="Kapat">×</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
 
+  <!-- Canlı Admin Paneli Modalı -->
+  <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card" style="width: min(600px, 100%);">
+      <button id="closeAdminModal" class="close-btn" aria-label="Kapat">×</button>
+      <h3 style="margin-top: 0; font-size: 20px;">⚙️ Canlı Yönetici Paneli</h3>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 15px; line-height: 1.4;">
+        Form alanlarını doldurup kaydet butonuna bastığınız an veriler Supabase veritabanınıza anında yazılır.
+      </p>
+      
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; text-align: left;">
+        <label>Adı Soyadı * <input type="text" id="admName" placeholder="Örn: Ahmet Yılmaz"></label>
+        <label>Bölümü * 
+          <select id="admDept">
+            <option value="Gastronomi ve Mutfak Sanatları">Gastronomi ve Mutfak Sanatları</option>
+            <option value="Turizm İşletmeciliği">Turizm İşletmeciliği</option>
+            <option value="Turizm Rehberliği">Turizm Rehberliği</option>
+            <option value="Yiyecek ve İçecek İşletmeciliği">Yiyecek ve İçecek İşletmeciliği</option>
+            <option value="Aşçılık">Aşçılık</option>
+            <option value="Muhasebe">Muhasebe</option>
+            <option value="Marina">Marina</option>
+          </select>
+        </label>
+        <label>Mezuniyet Yılı * <input type="number" id="admYear" placeholder="Örn: 2024"></label>
+        <label>Bulunduğu Şehir * <input type="text" id="admCity" placeholder="Örn: İstanbul"></label>
+        <label>Sektör * <input type="text" id="admSektor" placeholder="Örn: Yiyecek ve İçecek"></label>
+        <label>Çalışma Durumu * 
+          <select id="admStatus">
+            <option value="Çalışıyor">Çalışıyor</option>
+            <option value="Çalışmıyor">Çalışmıyor</option>
+            <option value="Girişimci">Girişimci</option>
+            <option value="Lisansüstü Eğitim">Lisansüstü Eğitim</option>
+          </select>
+        </label>
+        <label style="grid-column: span 2;">Çalıştığı Kurum veya Şirket * <input type="text" id="admCompany" placeholder="Örn: ABC Gastronomi"></label>
+        <label style="grid-column: span 2;">Unvan / Görevi * <input type="text" id="admJob" placeholder="Örn: Şef"></label>
+      </div>
 
-    <!-- ==================================================
-         FOOTER
-    =================================================== -->
+      <button id="btnSaveToDatabase" style="width: 100%; background: #238636; color: white; border: 0; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background 0.2s;">
+        💾 Veritabanına Doğrudan Kaydet (Kalıcı)
+      </button>
+    </div>
+  </div>
 
-    <footer>
+  <footer>
+    <p>© 2026 Mezun Öğrenci Portalı · GitHub Pages ve Supabase Canlı Entegrasyonu</p>
+    <p style="margin-top: 8px;"><a href="#" id="adminLoginLink" style="color: var(--muted); text-decoration: none; font-size: 11px; opacity: 0.6;">🔒 Yönetici Girişi</a></p>
+  </footer>
 
-        <p>
-            © 2026 Mezun Öğrenci Portalı
-            · GitHub Pages ve Supabase Canlı Entegrasyonu
-        </p>
-
-
-        <p style="margin-top:8px;">
-
-            <a
-                href="#"
-                id="adminLoginLink"
-                style="
-                    color:var(--muted);
-                    text-decoration:none;
-                    font-size:11px;
-                    opacity:0.6;
-                "
-            >
-                🔒 Yönetici Girişi
-            </a>
-
-        </p>
-
-    </footer>
-
-
-
-    <!-- ==================================================
-         UYGULAMA JAVASCRIPT
-         
-         DİKKAT:
-         script.js EN SONDA olmalıdır.
-    =================================================== -->
-
-    <script src="script.js"></script>
-
-
+  <!-- BAĞLANTILAR EN ALTA ALINDI (HATA ÖNLEYİCİ SIRALAMA) -->
+  <script src="https://unpkg.com"></script>
+  <script src="script.js"></script>
 </body>
-
 </html>
