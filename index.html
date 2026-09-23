@@ -37,7 +37,13 @@
           <h3>Mezunları Ara</h3>
           <p id="resultText">Tüm mezunlar gösteriliyor.</p>
         </div>
-        <button id="resetBtn" class="secondary-btn">Filtreleri Temizle</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <!-- Yeni Google Form Yönlendirme Butonu -->
+          <a href="https://forms.gle/P8L3vnqmyawbQzv38" target="_blank" class="primary-action-btn">
+            ➕ Kendini Sisteme Ekle (Kayıt Ol)
+          </a>
+          <button id="resetBtn" class="secondary-btn">Filtreleri Temizle</button>
+        </div>
       </div>
 
       <div class="filters">
@@ -81,6 +87,7 @@
     </div>
   </main>
 
+  <!-- Öğrenci Kart Detay Modalı (Orijinal yapınız) -->
   <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-card">
       <button id="closeModal" class="close-btn" aria-label="Kapat">×</button>
@@ -88,9 +95,105 @@
     </div>
   </div>
 
+  <!-- Şifreli Güvenli Yönetici Veri Dönüştürücü Panel Modalı (Admin) -->
+  <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card" style="width: min(600px, 100%);">
+      <button id="closeAdminModal" class="close-btn" aria-label="Kapat">×</button>
+      <h3 style="margin-top: 0; font-size: 20px;">⚙️ Yönetici Veri Dönüştürücü</h3>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 15px; line-height: 1.4;">
+        Google Form'dan gelen öğrenci verilerini aşağıdaki alanlara yazarak projeniz için hazır kod satırına dönüştürebilirsiniz.
+      </p>
+      
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; text-align: left;">
+        <label>Öğrenci Numarası * <input type="text" id="admId" placeholder="Örn: 2024110"></label>
+        <label>Adı Soyadı * <input type="text" id="admName" placeholder="Örn: Ahmet Yılmaz"></label>
+        <label>Bölümü * 
+          <select id="admDept">
+            <option value="Aşçılık">Aşçılık</option>
+            <option value="Muhasebe">Muhasebe</option>
+            <option value="Marina">Marina</option>
+            <option value="Turizm">Turizm</option>
+          </select>
+        </label>
+        <label>Mezuniyet Yılı * <input type="number" id="admYear" placeholder="Örn: 2025"></label>
+        <label>Bulunduğu Şehir * <input type="text" id="admCity" placeholder="Örn: Muğla"></label>
+        <label>Çalışma Durumu * 
+          <select id="admStatus">
+            <option value="Çalışıyor">Çalışıyor</option>
+            <option value="Çalışmıyor">Çalışmıyor</option>
+          </select>
+        </label>
+        <label style="grid-column: span 2;">Çalıştığı Kurum veya Şirket <input type="text" id="admCompany" placeholder="Örn: X Otel (Yoksa boş bırakın)"></label>
+        <label style="grid-column: span 2;">Görevi / İş Kolu <input type="text" id="admJob" placeholder="Örn: Şef Aşçı (Yoksa boş bırakın)"></label>
+      </div>
+
+      <button id="btnGenerateCode" style="width: 100%; background: var(--primary); color: white; border: 0; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 15px; font-size: 14px;">
+        🚀 data.js İçin Hazır Veri Kodu Üret
+      </button>
+
+      <label style="text-align: left;">
+        Üretilen Kod (Kopyalayıp data.js içine ekleyin):
+        <textarea id="admOutput" readonly style="width:100%; height: 100px; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-family: monospace; resize: none; margin-top: 5px; outline: none;"></textarea>
+      </label>
+    </div>
+  </div>
+
   <footer>
     <p>© 2026 Mezun Öğrenci Portalı · GitHub Pages uyumlu</p>
+    <p style="margin-top: 8px;"><a href="#" id="adminLoginLink" style="color: var(--muted); text-decoration: none; font-size: 11px; opacity: 0.6;">🔒 Yönetici Girişi</a></p>
   </footer>
+
+  <!-- Admin Panel Giriş Mantığı ve Kod Üretici Script -->
+  <script>
+    // Yönetici Girişi Tetikleyici
+    document.getElementById('adminLoginLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      const password = prompt("Yönetici giriş şifresini yazınız:");
+      if (password === "123456y.") {
+        document.getElementById('adminModal').classList.remove('hidden');
+      } else if (password !== null) {
+        alert("Hatalı şifre girdiniz!");
+      }
+    });
+
+    // Admin Modalı Kapatma
+    document.getElementById('closeAdminModal').addEventListener('click', function() {
+      document.getElementById('adminModal').classList.add('hidden');
+    });
+
+    // data.js Dosyası için JS Nesnesi Oluşturucu
+    document.getElementById('btnGenerateCode').addEventListener('click', function() {
+      const id = document.getElementById('admId').value.trim();
+      const name = document.getElementById('admName').value.trim();
+      const dept = document.getElementById('admDept').value;
+      const year = parseInt(document.getElementById('admYear').value.trim()) || 2026;
+      const city = document.getElementById('admCity').value.trim();
+      const status = document.getElementById('admStatus').value;
+      const company = document.getElementById('admCompany').value.trim() || "";
+      const job = document.getElementById('admJob').value.trim() || "";
+
+      if(!id || !name || !city) {
+        alert("Lütfen zorunlu alanları (*) doldurunuz!");
+        return;
+      }
+
+      // data.js dosyasındaki mevcut veri yapısıyla %100 eşleşen format
+      const generatedObj = `  {
+    id: "${id}",
+    name: "${name}",
+    dept: "${dept}",
+    year: ${year},
+    city: "${city}",
+    status: "${status}",
+    company: "${company}",
+    job: "${job}"
+  },`;
+
+      document.getElementById('admOutput').value = generatedObj;
+      document.getElementById('admOutput').select();
+      alert("Kod başarıyla üretildi ve metin seçildi! Ctrl+C (veya Cmd+C) yaparak kopyalayabilir ve direkt data.js içerisine ekleyebilirsiniz.");
+    });
+  </script>
 
   <script src="data.js"></script>
   <script src="script.js"></script>
