@@ -12,7 +12,10 @@ const SUPABASE_URL = "https://yevbibgsmhxgbtutgbmv.supabase.co";
 
 // BURAYA SUPABASE ANON / PUBLIC KEY'İNİZİ YAZIN
 const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
-
+// Çakışmayı önleyen güvenli kütüphane kontrolü
+const supabase = window.supabase && typeof window.supabase.createClient !== 'undefined' 
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+  : null;
 
 // Supabase bağlantısını oluştur
 window. supabase = window.supabase.createClient(
