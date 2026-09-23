@@ -2,95 +2,533 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Mezun Öğrenci Portalı - Mezunlarımızla bağlantıda kalın.">
+
     <title>Mezun Öğrenci Portalı</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="container">
-        <header>
-            <h1>🎓 Mezun Öğrenci Portalı</h1>
-            <p>Mezunlarımızla bağlantıda kalın</p>
-            <button id="theme-toggle" class="theme-btn">☾</button>
-        </header>
 
-        <main>
-            <section class="intro-section">
-                <h2>MEZUNLARIMIZ</h2>
-                <p class="subtitle">Mezun topluluğumuzu keşfedin.</p>
-                <p>Mezunlarımızı ad, bölüm, yıl, şehir ve çalışma durumuna göre hızlıca arayın.</p>
-            </section>
+<!-- =====================================================
+     ÜST MENÜ
+===================================================== -->
 
-            <section class="search-section">
-                <h3>🎓 Mezunları Ara</h3>
-                
-                <!-- Google Form Kayıt Butonu Başlangıcı -->
-                <div class="register-container">
-                    <a href="https://forms.gle/gUqhDcahoXYsw2f7A" target="_blank" class="register-btn">
-                        ➕ Kendini Sisteme Ekle (Kayıt Ol)
-                    </a>
-                </div>
-                <!-- Google Form Kayıt Butonu Bitişi -->
+<header class="topbar">
 
-                <div class="filter-controls">
-                    <span id="results-count" class="results-count">Tüm mezunlar gösteriliyor.</span>
-                    <button id="clear-filters" class="clear-btn">Filtreleri Temizle</button>
-                </div>
+    <div class="topbar-inner">
 
-                <div class="filters-grid">
-                    <div class="filter-group">
-                        <label for="search-input">🔎 Arama</label>
-                        <input type="text" id="search-input" placeholder="İsim ile ara...">
-                    </div>
+        <a href="#" class="brand">
 
-                    <div class="filter-group">
-                        <label for="dept-filter">Bölüm</label>
-                        <select id="dept-filter">
-                            <option value="">Tüm bölümler</option>
-                        </select>
-                    </div>
+            <div class="logo">
+                🎓
+            </div>
 
-                    <div class="filter-group">
-                        <label for="year-filter">Mezuniyet Yılı</label>
-                        <select id="year-filter">
-                            <option value="">Tüm yıllar</option>
-                        </select>
-                    </div>
+            <div class="brand-text">
 
-                    <div class="filter-group">
-                        <label for="city-filter">Şehir</label>
-                        <select id="city-filter">
-                            <option value="">Tüm şehirler</option>
-                        </select>
-                    </div>
+                <h1>Mezun Öğrenci Portalı</h1>
 
-                    <div class="filter-group">
-                        <label for="status-filter">Durum</label>
-                        <select id="status-filter">
-                            <option value="">Tümü</option>
-                        </select>
-                    </div>
-                </div>
-            </section>
+                <p>
+                    Mezunlarımızla bağlantıda kalın
+                </p>
 
-            <section class="results-section">
-                <div id="alumni-container" class="alumni-grid">
-                    <!-- Kartlar JavaScript ile buraya yüklenecektir -->
-                </div>
-                <div id="no-results" class="no-results hidden">
-                    <span class="no-results-icon">🔎</span>
-                    <h3>Mezun bulunamadı</h3>
-                    <p>Arama veya filtre kriterlerinizi değiştirmeyi deneyin.</p>
-                </div>
-            </section>
-        </main>
+            </div>
 
-        <footer>
-            <p>&copy; 2026 Mezun Öğrenci Portalı · GitHub Pages uyumlu</p>
-        </footer>
+        </a>
+
+
+        <nav class="navigation">
+
+            <a href="#anasayfa">
+                Ana Sayfa
+            </a>
+
+            <a href="#mezunlar">
+                Mezunlarımız
+            </a>
+
+            <a href="#kayit" class="nav-register">
+                Mezun Kaydı
+            </a>
+
+        </nav>
+
+
+        <button
+            id="themeBtn"
+            class="theme-btn"
+            title="Tema değiştir">
+
+            ☾
+
+        </button>
+
     </div>
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
+</header>
+
+
+<!-- =====================================================
+     ANA İÇERİK
+===================================================== -->
+
+<main class="container">
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section id="anasayfa" class="hero">
+
+    <div class="hero-content">
+
+        <span class="hero-eyebrow">
+            MEZUNLARIMIZ
+        </span>
+
+
+        <h2>
+            Mezun topluluğumuzu<br>
+            birlikte büyütelim.
+        </h2>
+
+
+        <p>
+
+            Mezunlarımızın birbirleriyle ve
+            üniversitemizle bağlantısını güçlendirmek,
+            kariyerlerini takip etmek ve güçlü bir
+            mezun ağı oluşturmak için buradayız.
+
+        </p>
+
+
+        <div class="hero-buttons">
+
+            <a href="#mezunlar"
+               class="primary-button">
+
+                Mezunlarımızı Keşfet
+
+            </a>
+
+
+            <a href="#kayit"
+               class="outline-button">
+
+                Mezun Kaydı Yap
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-icon">
+
+        <div class="hero-circle">
+
+            🎓
+
+        </div>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     İSTATİSTİKLER
+===================================================== -->
+
+<section id="stats" class="stats">
+
+    <!-- JavaScript tarafından doldurulacak -->
+
+</section>
+
+
+
+<!-- =====================================================
+     MEZUN KAYIT BÖLÜMÜ
+===================================================== -->
+
+<section id="kayit" class="registration-section">
+
+    <div class="registration-icon">
+
+        📝
+
+    </div>
+
+
+    <div class="registration-content">
+
+        <span class="section-label">
+            MEZUN KAYDI
+        </span>
+
+
+        <h2>
+            Siz de mezun topluluğumuza katılın
+        </h2>
+
+
+        <p>
+
+            Mezuniyet sonrası iletişim ve kariyer
+            bilgilerinizin güncel tutulabilmesi için
+            aşağıdaki formu doldurabilirsiniz.
+
+        </p>
+
+
+        <div class="registration-info">
+
+            <div class="info-item">
+
+                <span>✓</span>
+
+                <div>
+                    <strong>
+                        Mezuniyet bilgilerinizi paylaşın
+                    </strong>
+
+                    <small>
+                        Bölümünüz ve mezuniyet yılınızı belirtin.
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>✓</span>
+
+                <div>
+                    <strong>
+                        Kariyer bilgilerinizi güncelleyin
+                    </strong>
+
+                    <small>
+                        Çalıştığınız sektör ve kurum bilgilerini paylaşın.
+                    </small>
+                </div>
+
+            </div>
+
+
+            <div class="info-item">
+
+                <span>✓</span>
+
+                <div>
+                    <strong>
+                        Mezun ağımızın bir parçası olun
+                    </strong>
+
+                    <small>
+                        Mezun topluluğumuzla bağlantıda kalın.
+                    </small>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="https://forms.gle/BCAcJtjFhgZ4FPXK8"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="google-form-button">
+
+            <span class="google-icon">
+                G
+            </span>
+
+            Mezun Kayıt Formunu Doldur
+
+            <span class="arrow">
+                →
+            </span>
+
+        </a>
+
+
+        <p class="form-note">
+
+            Google Form yeni bir sekmede açılacaktır.
+
+        </p>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MEZUN ARAMA
+===================================================== -->
+
+<section id="mezunlar" class="portal-panel">
+
+    <div class="panel-heading">
+
+        <div>
+
+            <span class="section-label">
+                MEZUN PORTALI
+            </span>
+
+            <h2>
+                Mezunlarımız
+            </h2>
+
+            <p id="resultText">
+                Tüm mezunlar gösteriliyor.
+            </p>
+
+        </div>
+
+
+        <button
+            id="resetBtn"
+            class="reset-button">
+
+            Filtreleri Temizle
+
+        </button>
+
+    </div>
+
+
+    <!-- FİLTRELER -->
+
+    <div class="filters">
+
+
+        <label>
+
+            <span>
+                🔎 Arama
+            </span>
+
+            <input
+                id="searchInput"
+                type="search"
+                placeholder="Ad, bölüm, sektör...">
+
+        </label>
+
+
+        <label>
+
+            <span>
+                🎓 Bölüm
+            </span>
+
+            <select id="departmentFilter">
+
+                <option value="">
+                    Tüm bölümler
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            <span>
+                📅 Mezuniyet Yılı
+            </span>
+
+            <select id="yearFilter">
+
+                <option value="">
+                    Tüm yıllar
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            <span>
+                📍 Şehir
+            </span>
+
+            <select id="cityFilter">
+
+                <option value="">
+                    Tüm şehirler
+                </option>
+
+            </select>
+
+        </label>
+
+
+        <label>
+
+            <span>
+                💼 Durum
+            </span>
+
+            <select id="statusFilter">
+
+                <option value="">
+                    Tümü
+                </option>
+
+            </select>
+
+        </label>
+
+    </div>
+
+</section>
+
+
+
+<!-- =====================================================
+     MEZUN KARTLARI
+===================================================== -->
+
+<section id="graduates"
+         class="graduates">
+
+    <!-- JavaScript tarafından doldurulacak -->
+
+</section>
+
+
+
+<!-- =====================================================
+     SONUÇ BULUNAMADI
+===================================================== -->
+
+<div id="emptyState"
+     class="empty hidden">
+
+    <div class="empty-icon">
+        🔎
+    </div>
+
+    <h3>
+        Mezun bulunamadı
+    </h3>
+
+    <p>
+        Arama veya filtre kriterlerinizi
+        değiştirmeyi deneyin.
+    </p>
+
+</div>
+
+
+</main>
+
+
+
+<!-- =====================================================
+     PROFİL MODAL
+===================================================== -->
+
+<div
+    id="modal"
+    class="modal hidden"
+    role="dialog"
+    aria-modal="true">
+
+
+    <div class="modal-card">
+
+        <button
+            id="closeModal"
+            class="close-btn"
+            aria-label="Kapat">
+
+            ×
+
+        </button>
+
+
+        <div id="modalContent">
+
+            <!-- JavaScript dolduracak -->
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer>
+
+    <div class="footer-inner">
+
+        <div class="footer-logo">
+
+            🎓
+
+        </div>
+
+
+        <div>
+
+            <strong>
+                Mezun Öğrenci Portalı
+            </strong>
+
+            <p>
+                Mezunlarımızla birlikte geleceğe.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        © 2026 Mezun Öğrenci Portalı
+
+    </div>
+
+</footer>
+
+
+
+<!-- =====================================================
+     JAVASCRIPT DOSYALARI
+===================================================== -->
+
+<script src="data.js"></script>
+
+<script src="script.js"></script>
+
+
 </body>
 </html>
