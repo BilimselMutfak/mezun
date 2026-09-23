@@ -1,4 +1,3 @@
-```javascript
 // ========================================================
 // MEZUN PORTALI - SUPABASE + FİLTRELEME + ADMİN PANELİ
 // ========================================================
@@ -1599,4 +1598,3 @@ window.addEventListener(
 console.log(
     "Mezun Portalı JavaScript başarıyla yüklendi."
 );
-```
