@@ -111,13 +111,32 @@
     </div>
   </div>
 
+  <!-- Yönetici Giriş Modalı -->
+  <div id="loginModal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card" style="width: min(420px, 100%);">
+      <button id="closeLoginModal" class="close-btn" aria-label="Kapat">×</button>
+      <h3 style="margin-top: 0; font-size: 20px;">🔒 Yönetici Girişi</h3>
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 15px; line-height: 1.4;">
+        Sadece yetkili yöneticiler mezun kaydı ekleyebilir.
+      </p>
+      <div style="display: grid; gap: 12px; text-align: left; margin-bottom: 15px;">
+        <label>E-posta <input type="email" id="loginEmail" placeholder="ornek@eposta.com"></label>
+        <label>Şifre <input type="password" id="loginPassword" placeholder="••••••••"></label>
+      </div>
+      <p id="loginError" style="color:#b91c1c; font-size:13px; margin-bottom:10px; display:none;"></p>
+      <button id="btnLogin" style="width: 100%; background: var(--primary); color: white; border: 0; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 14px;">
+        Giriş Yap
+      </button>
+    </div>
+  </div>
+
   <!-- Canlı Admin Paneli Modalı -->
   <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-card" style="width: min(600px, 100%);">
       <button id="closeAdminModal" class="close-btn" aria-label="Kapat">×</button>
       <h3 style="margin-top: 0; font-size: 20px;">⚙️ Canlı Yönetici Paneli</h3>
       <p style="color: var(--muted); font-size: 13px; margin-bottom: 15px; line-height: 1.4;">
-        Form alanlarını doldurup kaydet butonuna bastığınız an veriler Supabase veritabanınıza anında yazılır.
+        Form alanlarını doldurup kaydet butonuna bastığınız an veriler Firestore veritabanınıza anında yazılır.
       </p>
       
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; text-align: left;">
@@ -155,10 +174,10 @@
   </div>
 
   <footer>
-    <p>© 2026 Mezun Öğrenci Portalı · GitHub Pages ve Supabase Canlı Entegrasyonu</p>
+    <p>© 2026 Mezun Öğrenci Portalı · GitHub Pages ve Firebase Canlı Entegrasyonu</p>
     <p style="margin-top: 8px;"><a href="#" id="adminLoginLink" style="color: var(--muted); text-decoration: none; font-size: 11px; opacity: 0.6;">🔒 Yönetici Girişi</a></p>
   </footer>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
