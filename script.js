@@ -4,10 +4,10 @@
 const SUPABASE_URL = "https://yevbibgsmhxgbtutgbmv.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
 
-const supabaseHeaders = {
-  "apikey": SUPABASE_ANON_KEY,
-  "Content-Type": "application/json"
-};
+if (!response.ok) {
+  const errorText = await response.text();
+  throw new Error(`Supabase Hatası (${response.status}): ${errorText}`);
+}
 
 // ========================================================
 // GLOBAL UYGULAMA DEĞİŞKENLERİ
