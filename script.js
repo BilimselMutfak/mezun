@@ -6,7 +6,6 @@ const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
 
 const supabaseHeaders = {
   "apikey": SUPABASE_ANON_KEY,
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
   "Content-Type": "application/json"
 };
 
