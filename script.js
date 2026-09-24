@@ -47,7 +47,10 @@ async function fetchGraduatesFromDatabase() {
       headers: supabaseHeaders
     });
 
-    if (!response.ok) throw new Error("Ağ bağlantısı başarısız oldu.");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Supabase Hatası (${response.status}): ${errorText}`);
+    }
 
     const data = await response.json();
     localGraduatesData = data || [];
