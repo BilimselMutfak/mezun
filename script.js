@@ -1,19 +1,32 @@
 // ========================================================
-// HARİCİ KÜTÜPHANE BAĞIMSIZ DOĞRUDAN SUPABASE MOTORU
+// FIREBASE MOTORU (Authentication + Firestore)
 // ========================================================
-const SUPABASE_URL = "https://yevbibgsmhxgbtutgbmv.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import {
+  getFirestore, collection, getDocs, doc, getDoc, addDoc
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-const supabaseHeaders = {
-  "apikey": SUPABASE_ANON_KEY,
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-  "Content-Type": "application/json"
+const firebaseConfig = {
+  apiKey: "AIzaSyClVse5IDWDPo5jLXz_YNKKew3vMUMdAhA",
+  authDomain: "mezunlar-9af10.firebaseapp.com",
+  projectId: "mezunlar-9af10",
+  storageBucket: "mezunlar-9af10.firebasestorage.app",
+  messagingSenderId: "572752219682",
+  appId: "1:572752219682:web:968dffe69fdc2c6506c47b"
 };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 // ========================================================
 // GLOBAL UYGULAMA DEĞİŞKENLERİ
 // ========================================================
 let localGraduatesData = [];
+let isAdmin = false;
 
 // DOM Elemanları
 const graduatesContainer = document.getElementById('graduates');
@@ -30,11 +43,18 @@ const modal = document.getElementById('modal');
 const closeModal = document.getElementById('closeModal');
 const modalContent = document.getElementById('modalContent');
 
-// Admin DOM Elemanları
+// Admin / Login DOM Elemanları
 const adminLoginLink = document.getElementById('adminLoginLink');
 const adminModal = document.getElementById('adminModal');
 const closeAdminModal = document.getElementById('closeAdminModal');
 const btnSaveToDatabase = document.getElementById('btnSaveToDatabase');
+
+const loginModal = document.getElementById('loginModal');
+const closeLoginModal = document.getElementById('closeLoginModal');
+const btnLogin = document.getElementById('btnLogin');
+const loginEmail = document.getElementById('loginEmail');
+const loginPassword = document.getElementById('loginPassword');
+const loginError = document.getElementById('loginError');
 
 // ========================================================
 // VERİTABANINDAN VERİ ÇEKME VE UYGULAMAYI BAŞLATMA
@@ -43,18 +63,8 @@ async function fetchGraduatesFromDatabase() {
   try {
     resultText.textContent = "Veriler buluttan yükleniyor...";
 
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/mezunlar?select=*&order=id.asc`, {
-      method: 'GET',
-      headers: supabaseHeaders
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Supabase Hatası (${response.status}): ${errorText}`);
-    }
-
-    const data = await response.json();
-    localGraduatesData = data || [];
+    const snapshot = await getDocs(collection(db, 'mezunlar'));
+    localGraduatesData = snapshot.docs.map(d => d.data());
 
     populateFilterOptions();
     calculateAndRenderStats();
@@ -72,6 +82,35 @@ document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark');
     themeBtn.textContent = '☼';
+  }
+});
+
+// ========================================================
+// KİMLİK DOĞRULAMA (AUTHENTICATION) DURUMU
+// ========================================================
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    isAdmin = false;
+    adminLoginLink.textContent = '🔒 Yönetici Girişi';
+    return;
+  }
+
+  // Kullanıcı giriş yapmış, admin mi diye Firestore'dan kontrol et
+  try {
+    const adminDoc = await getDoc(doc(db, 'adminler', user.uid));
+    if (adminDoc.exists()) {
+      isAdmin = true;
+      const adminData = adminDoc.data();
+      adminLoginLink.textContent = `🔓 Çıkış Yap (${adminData.ad || 'Yönetici'})`;
+    } else {
+      isAdmin = false;
+      adminLoginLink.textContent = '🔒 Yönetici Girişi';
+      alert("Bu hesabın yönetici yetkisi yok.");
+      await signOut(auth);
+    }
+  } catch (err) {
+    console.error("Yetki kontrol hatası:", err.message);
+    isAdmin = false;
   }
 });
 
@@ -129,19 +168,19 @@ function clearSelectOptions(selectElement) {
 }
 
 function filterAndRenderGraduates() {
-  const query = searchInput.value.toLowerCase().trim();
+  const query_ = searchInput.value.toLowerCase().trim();
   const selectedDept = departmentFilter.value;
   const selectedYear = yearFilter.value;
   const selectedCity = cityFilter.value;
   const selectedStatus = statusFilter.value;
 
   const filtered = localGraduatesData.filter(m => {
-    const matchesSearch = !query ||
-      (m.ad && m.ad.toLowerCase().includes(query)) ||
-      (m.bolum && m.bolum.toLowerCase().includes(query)) ||
-      (m.kurum && m.kurum.toLowerCase().includes(query)) ||
-      (m.sektor && m.sektor.toLowerCase().includes(query)) ||
-      (m.unvan && m.unvan.toLowerCase().includes(query));
+    const matchesSearch = !query_ ||
+      (m.ad && m.ad.toLowerCase().includes(query_)) ||
+      (m.bolum && m.bolum.toLowerCase().includes(query_)) ||
+      (m.kurum && m.kurum.toLowerCase().includes(query_)) ||
+      (m.sektor && m.sektor.toLowerCase().includes(query_)) ||
+      (m.unvan && m.unvan.toLowerCase().includes(query_));
 
     const matchesDept = !selectedDept || m.bolum === selectedDept;
     const matchesYear = !selectedYear || String(m.yil) === selectedYear;
@@ -230,6 +269,7 @@ resetBtn.addEventListener('click', () => {
 
 closeModal.addEventListener('click', () => modal.classList.add('hidden'));
 closeAdminModal.addEventListener('click', () => adminModal.classList.add('hidden'));
+closeLoginModal.addEventListener('click', () => loginModal.classList.add('hidden'));
 
 themeBtn.addEventListener('click', () => {
   const isDark = document.body.classList.toggle('dark');
@@ -237,17 +277,71 @@ themeBtn.addEventListener('click', () => {
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
 });
 
-adminLoginLink.addEventListener('click', (e) => {
+// ========================================================
+// GİRİŞ / ÇIKIŞ AKIŞI
+// ========================================================
+adminLoginLink.addEventListener('click', async (e) => {
   e.preventDefault();
-  const password = prompt("Yönetici giriş şifresini yazınız:");
-  if (password === "123456y.") {
-    adminModal.classList.remove('hidden');
-  } else if (password !== null) {
-    alert("Hatalı şifre girdiniz!");
+
+  if (isAdmin) {
+    // Zaten giriş yapmış -> tıklama çıkış yapar
+    await signOut(auth);
+    alert("Çıkış yapıldı.");
+    return;
+  }
+
+  // Giriş yapılmamış -> login modalını aç
+  loginError.style.display = 'none';
+  loginEmail.value = '';
+  loginPassword.value = '';
+  loginModal.classList.remove('hidden');
+});
+
+btnLogin.addEventListener('click', async () => {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+    loginError.textContent = "Lütfen e-posta ve şifre girin.";
+    loginError.style.display = 'block';
+    return;
+  }
+
+  try {
+    btnLogin.disabled = true;
+    btnLogin.textContent = "Giriş yapılıyor...";
+
+    await signInWithEmailAndPassword(auth, email, password);
+
+    loginModal.classList.add('hidden');
+
+    // Admin kontrolü onAuthStateChanged içinde asenkron yapılıyor.
+    // Kısa bir bekleme sonrası admin paneli açalım.
+    setTimeout(() => {
+      if (isAdmin) {
+        adminModal.classList.remove('hidden');
+      }
+    }, 600);
+
+  } catch (err) {
+    console.error("Giriş hatası:", err.message);
+    loginError.textContent = "Giriş başarısız: E-posta veya şifre hatalı.";
+    loginError.style.display = 'block';
+  } finally {
+    btnLogin.disabled = false;
+    btnLogin.textContent = "Giriş Yap";
   }
 });
 
+// ========================================================
+// YENİ MEZUN KAYDI EKLEME (Sadece adminler)
+// ========================================================
 btnSaveToDatabase.addEventListener('click', async () => {
+  if (!isAdmin) {
+    alert("Bu işlemi yapmak için yönetici girişi yapmalısınız.");
+    return;
+  }
+
   const name = document.getElementById('admName').value.trim();
   const dept = document.getElementById('admDept').value;
   const year = parseInt(document.getElementById('admYear').value.trim());
@@ -266,25 +360,23 @@ btnSaveToDatabase.addEventListener('click', async () => {
     btnSaveToDatabase.disabled = true;
     btnSaveToDatabase.textContent = "Buluta Kaydediliyor...";
 
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/mezunlar`, {
-      method: 'POST',
-      headers: {
-        ...supabaseHeaders,
-        "Prefer": "return=representation"
-      },
-      body: JSON.stringify({
-        ad: name,
-        bolum: dept,
-        yil: year,
-        sehir: city,
-        sektor: sektor,
-        durum: status,
-        kurum: company,
-        unvan: job
-      })
-    });
+    // Basit, benzersiz bir sayısal id üret (mevcut en büyük id + 1)
+    const maxId = localGraduatesData.reduce((max, m) => Math.max(max, Number(m.id) || 0), 0);
+    const newId = maxId + 1;
 
-    if (!response.ok) throw new Error("Veri tabanına yazma hatası.");
+    const newGraduate = {
+      id: newId,
+      ad: name,
+      bolum: dept,
+      yil: year,
+      sehir: city,
+      sektor: sektor,
+      durum: status,
+      kurum: company,
+      unvan: job
+    };
+
+    await addDoc(collection(db, 'mezunlar'), newGraduate);
 
     alert("Harika! Yeni mezun kaydı bulut veritabanınıza başarıyla doğrudan eklendi.");
 
