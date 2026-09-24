@@ -4,10 +4,11 @@
 const SUPABASE_URL = "https://yevbibgsmhxgbtutgbmv.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_euV481YL-C4481-_dPGXOw_0HIrIiSH";
 
-if (!response.ok) {
-  const errorText = await response.text();
-  throw new Error(`Supabase Hatası (${response.status}): ${errorText}`);
-}
+const supabaseHeaders = {
+  "apikey": SUPABASE_ANON_KEY,
+  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+  "Content-Type": "application/json"
+};
 
 // ========================================================
 // GLOBAL UYGULAMA DEĞİŞKENLERİ
@@ -41,7 +42,7 @@ const btnSaveToDatabase = document.getElementById('btnSaveToDatabase');
 async function fetchGraduatesFromDatabase() {
   try {
     resultText.textContent = "Veriler buluttan yükleniyor...";
-    
+
     const response = await fetch(`${SUPABASE_URL}/rest/v1/mezunlar?select=*&order=id.asc`, {
       method: 'GET',
       headers: supabaseHeaders
@@ -54,11 +55,11 @@ async function fetchGraduatesFromDatabase() {
 
     const data = await response.json();
     localGraduatesData = data || [];
-    
+
     populateFilterOptions();
     calculateAndRenderStats();
     filterAndRenderGraduates();
-    
+
   } catch (err) {
     console.error("Veritabanı bağlantı hatası:", err.message);
     resultText.textContent = "Veri yükleme hatası oluştu.";
@@ -67,7 +68,7 @@ async function fetchGraduatesFromDatabase() {
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchGraduatesFromDatabase();
-  
+
   if (localStorage.getItem('theme') === 'dark') {
     document.body.classList.add('dark');
     themeBtn.textContent = '☼';
@@ -79,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ========================================================
 function calculateAndRenderStats() {
   const total = localGraduatesData.length;
-  const working = localGraduatesData.filter(m => m.durum === "Çalşıyor" || m.durum === "Çalışıyor" || m.durum === "Girişimci").length;
-  
+  const working = localGraduatesData.filter(m => m.durum === "Çalışıyor" || m.durum === "Girişimci").length;
+
   const depts = new Set(localGraduatesData.map(m => m.bolum).filter(Boolean));
   const cities = new Set(localGraduatesData.map(m => m.sehir).filter(Boolean));
 
@@ -103,6 +104,7 @@ function calculateAndRenderStats() {
     </div>
   `;
 }
+
 function populateFilterOptions() {
   clearSelectOptions(departmentFilter);
   clearSelectOptions(yearFilter);
@@ -110,7 +112,7 @@ function populateFilterOptions() {
   clearSelectOptions(statusFilter);
 
   const depts = [...new Set(localGraduatesData.map(m => m.bolum).filter(Boolean))].sort();
-  const years = [...new Set(localGraduatesData.map(m => m.yil).filter(Boolean))].sort((a,b) => b - a);
+  const years = [...new Set(localGraduatesData.map(m => m.yil).filter(Boolean))].sort((a, b) => b - a);
   const cities = [...new Set(localGraduatesData.map(m => m.sehir).filter(Boolean))].sort();
   const statuses = [...new Set(localGraduatesData.map(m => m.durum).filter(Boolean))].sort();
 
@@ -134,7 +136,7 @@ function filterAndRenderGraduates() {
   const selectedStatus = statusFilter.value;
 
   const filtered = localGraduatesData.filter(m => {
-    const matchesSearch = !query || 
+    const matchesSearch = !query ||
       (m.ad && m.ad.toLowerCase().includes(query)) ||
       (m.bolum && m.bolum.toLowerCase().includes(query)) ||
       (m.kurum && m.kurum.toLowerCase().includes(query)) ||
@@ -188,7 +190,7 @@ function renderGraduatesCards(list) {
   });
 }
 
-window.openGraduateDetail = function(id) {
+window.openGraduateDetail = function (id) {
   const m = localGraduatesData.find(grad => grad.id === id);
   if (!m) return;
 
@@ -270,29 +272,29 @@ btnSaveToDatabase.addEventListener('click', async () => {
         ...supabaseHeaders,
         "Prefer": "return=representation"
       },
-      body: JSON.stringify({ 
-        ad: name, 
-        bolum: dept, 
-        yil: year, 
-        sehir: city, 
-        sektor: sektor, 
-        durum: status, 
-        kurum: company, 
-        unvan: job 
+      body: JSON.stringify({
+        ad: name,
+        bolum: dept,
+        yil: year,
+        sehir: city,
+        sektor: sektor,
+        durum: status,
+        kurum: company,
+        unvan: job
       })
     });
 
     if (!response.ok) throw new Error("Veri tabanına yazma hatası.");
 
     alert("Harika! Yeni mezun kaydı bulut veritabanınıza başarıyla doğrudan eklendi.");
-    
+
     document.getElementById('admName').value = '';
     document.getElementById('admYear').value = '';
     document.getElementById('admCity').value = '';
     document.getElementById('admSektor').value = '';
     document.getElementById('admCompany').value = '';
     document.getElementById('admJob').value = '';
-    
+
     adminModal.classList.add('hidden');
     await fetchGraduatesFromDatabase();
 
