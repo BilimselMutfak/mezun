@@ -1,29 +1,23 @@
-// ========================================================
-// FIREBASE MOTORU (Authentication + Firestore)
-// ========================================================
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-
 import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 
 import {
   getFirestore,
   collection,
   getDocs,
-  doc,
-  getDoc,
   addDoc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-// ========================================================
-// FIREBASE AYARLARI
-// ========================================================
+/* ========================================================
+   FIREBASE AYARLARI
+   ======================================================== */
 
 const firebaseConfig = {
   apiKey: "AIzaSyClVse5IDWDPo5jLXz_YNKKew3vMUMdAhA",
@@ -34,125 +28,149 @@ const firebaseConfig = {
   appId: "1:572752219682:web:968dffe69fdc2c6506c47b"
 };
 
-
-// ========================================================
-// FIREBASE BAŞLAT
-// ========================================================
+/* ========================================================
+   FIREBASE BAŞLAT
+   ======================================================== */
 
 const app = initializeApp(firebaseConfig);
-
+const db = getFirestore(app);
 const auth = getAuth(app);
 
-const db = getFirestore(app);
-
-
-// ========================================================
-// GLOBAL UYGULAMA DEĞİŞKENLERİ
-// ========================================================
+/* ========================================================
+   GLOBAL DEĞİŞKENLER
+   ======================================================== */
 
 let localGraduatesData = [];
 
-let isAdmin = false;
+/* ========================================================
+   HTML ELEMENTLERİ
+   ======================================================== */
 
+const graduatesContainer = document.getElementById("graduates");
+const emptyState = document.getElementById("emptyState");
 
-// ========================================================
-// DOM ELEMANLARI
-// ========================================================
+const searchInput = document.getElementById("searchInput");
+const departmentFilter = document.getElementById("departmentFilter");
+const yearFilter = document.getElementById("yearFilter");
+const cityFilter = document.getElementById("cityFilter");
+const statusFilter = document.getElementById("statusFilter");
 
-const graduatesContainer =
-  document.getElementById('graduates');
+const resetBtn = document.getElementById("resetBtn");
 
-const searchInput =
-  document.getElementById('searchInput');
+const resultText = document.getElementById("resultText");
 
-const departmentFilter =
-  document.getElementById('departmentFilter');
+const statTotal = document.getElementById("stat-total");
+const statWorking = document.getElementById("stat-working");
+const statDepartments = document.getElementById("stat-departments");
+const statCities = document.getElementById("stat-cities");
 
-const yearFilter =
-  document.getElementById('yearFilter');
+const themeBtn = document.getElementById("themeBtn");
 
-const cityFilter =
-  document.getElementById('cityFilter');
+const modal = document.getElementById("modal");
+const modalContent = document.getElementById("modalContent");
+const closeModal = document.getElementById("closeModal");
 
-const statusFilter =
-  document.getElementById('statusFilter');
+const loginModal = document.getElementById("loginModal");
+const closeLoginModal = document.getElementById("closeLoginModal");
 
-const resetBtn =
-  document.getElementById('resetBtn');
+const adminModal = document.getElementById("adminModal");
+const closeAdminModal = document.getElementById("closeAdminModal");
 
-const resultText =
-  document.getElementById('resultText');
+const adminLoginLink = document.getElementById("adminLoginLink");
 
-const emptyState =
-  document.getElementById('emptyState');
+const btnLogin = document.getElementById("btnLogin");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
+const loginError = document.getElementById("loginError");
 
-const themeBtn =
-  document.getElementById('themeBtn');
+const btnSaveToDatabase = document.getElementById("btnSaveToDatabase");
 
-const modal =
-  document.getElementById('modal');
+/* ========================================================
+   SAYFA AÇILDIĞINDA
+   ======================================================== */
 
-const closeModal =
-  document.getElementById('closeModal');
+document.addEventListener("DOMContentLoaded", () => {
 
-const modalContent =
-  document.getElementById('modalContent');
+  fetchGraduatesFromDatabase();
 
+  setupEventListeners();
 
-// ========================================================
-// ADMIN / LOGIN DOM ELEMANLARI
-// ========================================================
+  setupTheme();
 
-const adminLoginLink =
-  document.getElementById('adminLoginLink');
+});
 
-const adminModal =
-  document.getElementById('adminModal');
+/* ========================================================
+   EVENTLER
+   ======================================================== */
 
-const closeAdminModal =
-  document.getElementById('closeAdminModal');
+function setupEventListeners() {
 
-const btnSaveToDatabase =
-  document.getElementById('btnSaveToDatabase');
+  searchInput.addEventListener("input", filterAndRenderGraduates);
 
-const loginModal =
-  document.getElementById('loginModal');
+  departmentFilter.addEventListener("change", filterAndRenderGraduates);
 
-const closeLoginModal =
-  document.getElementById('closeLoginModal');
+  yearFilter.addEventListener("change", filterAndRenderGraduates);
 
-const btnLogin =
-  document.getElementById('btnLogin');
+  cityFilter.addEventListener("change", filterAndRenderGraduates);
 
-const loginEmail =
-  document.getElementById('loginEmail');
+  statusFilter.addEventListener("change", filterAndRenderGraduates);
 
-const loginPassword =
-  document.getElementById('loginPassword');
+  resetBtn.addEventListener("click", resetFilters);
 
-const loginError =
-  document.getElementById('loginError');
+  closeModal.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
 
+  closeLoginModal.addEventListener("click", () => {
+    loginModal.classList.add("hidden");
+  });
 
-// ========================================================
-// VERİTABANINDAN VERİ ÇEKME
-// ========================================================
+  closeAdminModal.addEventListener("click", () => {
+    adminModal.classList.add("hidden");
+  });
+
+  adminLoginLink.addEventListener("click", (event) => {
+
+    event.preventDefault();
+
+    loginError.style.display = "none";
+
+    loginModal.classList.remove("hidden");
+
+  });
+
+  btnLogin.addEventListener("click", adminLogin);
+
+  btnSaveToDatabase.addEventListener("click", saveGraduateToDatabase);
+
+  themeBtn.addEventListener("click", toggleTheme);
+
+}
+
+/* ========================================================
+   FIRESTORE'DAN MEZUNLARI GETİR
+   ======================================================== */
 
 async function fetchGraduatesFromDatabase() {
 
   try {
 
-    resultText.textContent =
-      "Veriler buluttan yükleniyor...";
+    resultText.textContent = "Veriler yükleniyor...";
 
+    const snapshot = await getDocs(
+      collection(db, "mezunlar")
+    );
 
-    const snapshot =
-      await getDocs(collection(db, 'mezunlar'));
+    localGraduatesData = snapshot.docs.map(doc => {
 
+      const data = doc.data();
 
-    localGraduatesData =
-      snapshot.docs.map(d => d.data());
+      return {
+        ...data,
+        firestoreId: doc.id
+      };
 
+    });
 
     populateFilterOptions();
 
@@ -160,112 +178,116 @@ async function fetchGraduatesFromDatabase() {
 
     filterAndRenderGraduates();
 
+  } catch (error) {
 
-  } catch (err) {
-
-    console.error(
-      "Veritabanı bağlantı hatası:",
-      err.message
-    );
+    console.error("Firestore veri alma hatası:", error);
 
     resultText.textContent =
-      "Veri yükleme hatası oluştu.";
+      "Veriler yüklenirken bir hata oluştu.";
+
   }
+
 }
 
+/* ========================================================
+   FİLTRE SEÇENEKLERİNİ DOLDUR
+   ======================================================== */
 
-// ========================================================
-// UYGULAMAYI BAŞLAT
-// ========================================================
+function populateFilterOptions() {
 
-document.addEventListener('DOMContentLoaded', () => {
+  const departments = [
+    ...new Set(
+      localGraduatesData
+        .map(m => m.bolum)
+        .filter(Boolean)
+    )
+  ].sort();
 
-  fetchGraduatesFromDatabase();
+  const years = [
+    ...new Set(
+      localGraduatesData
+        .map(m => m.yil)
+        .filter(Boolean)
+    )
+  ].sort((a, b) => Number(b) - Number(a));
 
+  const cities = [
+    ...new Set(
+      localGraduatesData
+        .map(m => m.sehir)
+        .filter(Boolean)
+    )
+  ].sort();
 
-  if (localStorage.getItem('theme') === 'dark') {
+  const statuses = [
+    ...new Set(
+      localGraduatesData
+        .map(m => m.durum)
+        .filter(Boolean)
+    )
+  ].sort();
 
-    document.body.classList.add('dark');
+  departmentFilter.innerHTML =
+    `<option value="">Tüm bölümler</option>`;
 
-    themeBtn.textContent = '☼';
-  }
+  departments.forEach(dept => {
 
-});
+    departmentFilter.innerHTML += `
+      <option value="${escapeHtml(dept)}">
+        ${escapeHtml(dept)}
+      </option>
+    `;
 
+  });
 
-// ========================================================
-// KİMLİK DOĞRULAMA
-// ========================================================
+  yearFilter.innerHTML =
+    `<option value="">Tüm yıllar</option>`;
 
-onAuthStateChanged(auth, async (user) => {
+  years.forEach(year => {
 
-  if (!user) {
+    yearFilter.innerHTML += `
+      <option value="${escapeHtml(year)}">
+        ${escapeHtml(year)}
+      </option>
+    `;
 
-    isAdmin = false;
+  });
 
-    adminLoginLink.textContent =
-      '🔒 Yönetici Girişi';
+  cityFilter.innerHTML =
+    `<option value="">Tüm şehirler</option>`;
 
-    return;
-  }
+  cities.forEach(city => {
 
+    cityFilter.innerHTML += `
+      <option value="${escapeHtml(city)}">
+        ${escapeHtml(city)}
+      </option>
+    `;
 
-  try {
+  });
 
-    const adminDoc =
-      await getDoc(
-        doc(db, 'adminler', user.uid)
-      );
+  statusFilter.innerHTML =
+    `<option value="">Tümü</option>`;
 
+  statuses.forEach(status => {
 
-    if (adminDoc.exists()) {
+    statusFilter.innerHTML += `
+      <option value="${escapeHtml(status)}">
+        ${escapeHtml(status)}
+      </option>
+    `;
 
-      isAdmin = true;
+  });
 
-      const adminData =
-        adminDoc.data();
+}
 
-
-      adminLoginLink.textContent =
-        `🔓 Çıkış Yap (${adminData.ad || 'Yönetici'})`;
-
-    } else {
-
-      isAdmin = false;
-
-      adminLoginLink.textContent =
-        '🔒 Yönetici Girişi';
-
-      alert(
-        "Bu hesabın yönetici yetkisi yok."
-      );
-
-      await signOut(auth);
-    }
-
-
-  } catch (err) {
-
-    console.error(
-      "Yetki kontrol hatası:",
-      err.message
-    );
-
-    isAdmin = false;
-  }
-
-});
-
-
-// ========================================================
-// İSTATİSTİKLERİ HESAPLA
-// ========================================================
+/* ========================================================
+   İSTATİSTİKLER
+   ======================================================== */
 
 function calculateAndRenderStats() {
 
-  const total =
-    localGraduatesData.length;
-
+  const total = localGraduatesData.length;
 
   const working =
     localGraduatesData.filter(
@@ -274,274 +296,92 @@ function calculateAndRenderStats() {
         m.durum === "Girişimci"
     ).length;
 
-
-  const depts =
+  const departments =
     new Set(
       localGraduatesData
         .map(m => m.bolum)
         .filter(Boolean)
-    );
-
+    ).size;
 
   const cities =
     new Set(
       localGraduatesData
         .map(m => m.sehir)
         .filter(Boolean)
-    );
+    ).size;
 
+  statTotal.textContent = total;
 
-  document.getElementById('stats').innerHTML = `
+  statWorking.textContent = working;
 
-    <div class="stat">
+  statDepartments.textContent = departments;
 
-      <div class="number">
-        ${total}
-      </div>
-
-      <div class="label">
-        Toplam Mezun
-      </div>
-
-    </div>
-
-
-    <div class="stat">
-
-      <div class="number">
-        ${working}
-      </div>
-
-      <div class="label">
-        Çalışan Mezun
-      </div>
-
-    </div>
-
-
-    <div class="stat">
-
-      <div class="number">
-        ${depts.size}
-      </div>
-
-      <div class="label">
-        Aktif Bölüm
-      </div>
-
-    </div>
-
-
-    <div class="stat">
-
-      <div class="number">
-        ${cities.size}
-      </div>
-
-      <div class="label">
-        Farklı Şehir
-      </div>
-
-    </div>
-
-  `;
-}
-
-
-// ========================================================
-// FİLTRELERİ DOLDUR
-// ========================================================
-
-function populateFilterOptions() {
-
-  clearSelectOptions(departmentFilter);
-
-  clearSelectOptions(yearFilter);
-
-  clearSelectOptions(cityFilter);
-
-  clearSelectOptions(statusFilter);
-
-
-  const depts =
-    [
-      ...new Set(
-        localGraduatesData
-          .map(m => m.bolum)
-          .filter(Boolean)
-      )
-    ].sort();
-
-
-  const years =
-    [
-      ...new Set(
-        localGraduatesData
-          .map(m => m.yil)
-          .filter(Boolean)
-      )
-    ].sort(
-      (a, b) => b - a
-    );
-
-
-  const cities =
-    [
-      ...new Set(
-        localGraduatesData
-          .map(m => m.sehir)
-          .filter(Boolean)
-      )
-    ].sort();
-
-
-  const statuses =
-    [
-      ...new Set(
-        localGraduatesData
-          .map(m => m.durum)
-          .filter(Boolean)
-      )
-    ].sort();
-
-
-  depts.forEach(d => {
-
-    departmentFilter.appendChild(
-      new Option(d, d)
-    );
-
-  });
-
-
-  years.forEach(y => {
-
-    yearFilter.appendChild(
-      new Option(y, y)
-    );
-
-  });
-
-
-  cities.forEach(c => {
-
-    cityFilter.appendChild(
-      new Option(c, c)
-    );
-
-  });
-
-
-  statuses.forEach(s => {
-
-    statusFilter.appendChild(
-      new Option(s, s)
-    );
-
-  });
+  statCities.textContent = cities;
 
 }
 
-
-// ========================================================
-// SELECT TEMİZLE
-// ========================================================
-
-function clearSelectOptions(selectElement) {
-
-  while (selectElement.options.length > 1) {
-
-    selectElement.remove(1);
-
-  }
-
-}
-
-
-// ========================================================
-// FİLTRELE VE KARTLARI GÖSTER
-// ========================================================
+/* ========================================================
+   FİLTRELEME
+   ======================================================== */
 
 function filterAndRenderGraduates() {
 
-  const query_ =
+  const search =
     searchInput.value
-      .toLowerCase()
-      .trim();
+      .trim()
+      .toLocaleLowerCase("tr-TR");
 
-
-  const selectedDept =
+  const department =
     departmentFilter.value;
 
-
-  const selectedYear =
+  const year =
     yearFilter.value;
 
-
-  const selectedCity =
+  const city =
     cityFilter.value;
 
-
-  const selectedStatus =
+  const status =
     statusFilter.value;
-
 
   const filtered =
     localGraduatesData.filter(m => {
 
+      const searchableText = [
+
+        m.ad,
+        m.bolum,
+        m.kurum,
+        m.sektor,
+        m.unvan
+
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("tr-TR");
 
       const matchesSearch =
-        !query_ ||
+        !search ||
+        searchableText.includes(search);
 
-        (m.ad &&
-          m.ad
-            .toLowerCase()
-            .includes(query_)) ||
-
-        (m.bolum &&
-          m.bolum
-            .toLowerCase()
-            .includes(query_)) ||
-
-        (m.kurum &&
-          m.kurum
-            .toLowerCase()
-            .includes(query_)) ||
-
-        (m.sektor &&
-          m.sektor
-            .toLowerCase()
-            .includes(query_)) ||
-
-        (m.unvan &&
-          m.unvan
-            .toLowerCase()
-            .includes(query_));
-
-
-      const matchesDept =
-        !selectedDept ||
-        m.bolum === selectedDept;
-
+      const matchesDepartment =
+        !department ||
+        m.bolum === department;
 
       const matchesYear =
-        !selectedYear ||
-        String(m.yil) === selectedYear;
-
+        !year ||
+        String(m.yil) === String(year);
 
       const matchesCity =
-        !selectedCity ||
-        m.sehir === selectedCity;
-
+        !city ||
+        m.sehir === city;
 
       const matchesStatus =
-        !selectedStatus ||
-        m.durum === selectedStatus;
-
+        !status ||
+        m.durum === status;
 
       return (
         matchesSearch &&
-        matchesDept &&
+        matchesDepartment &&
         matchesYear &&
         matchesCity &&
         matchesStatus
@@ -549,141 +389,124 @@ function filterAndRenderGraduates() {
 
     });
 
-
   renderGraduatesCards(filtered);
 
-
-  if (
-    filtered.length ===
-    localGraduatesData.length
-  ) {
-
-    resultText.textContent =
-      "Tüm mezunlar gösteriliyor.";
-
-  } else {
-
-    resultText.textContent =
-      `${filtered.length} mezun bulundu.`;
-
-  }
+  resultText.textContent =
+    `${filtered.length} mezun gösteriliyor`;
 
 }
 
-
-// ========================================================
-// MEZUN KARTLARINI OLUŞTUR
-// ========================================================
+/* ========================================================
+   MEZUN KARTLARINI OLUŞTUR
+   ======================================================== */
 
 function renderGraduatesCards(list) {
 
-  graduatesContainer.innerHTML = '';
+  graduatesContainer.innerHTML = "";
 
+  if (!list.length) {
 
-  if (list.length === 0) {
-
-    emptyState.classList.remove('hidden');
+    emptyState.classList.remove("hidden");
 
     return;
+
   }
 
-
-  emptyState.classList.add('hidden');
-
+  emptyState.classList.add("hidden");
 
   list.forEach(m => {
 
-    const firstLetter =
-      m.ad
-        ? m.ad.charAt(0).toUpperCase()
-        : '?';
-
-
     const card =
-      document.createElement('div');
+      document.createElement("div");
 
+    /*
+     * DURUMA GÖRE KART RENGİ
+     *
+     * Çalışıyor       → Yeşil
+     * Çalışmıyor      → Kırmızı
+     * Girişimci        → Mavi
+     * Diğer durumlar  → Normal
+     */
 
-    // ====================================================
-    // ÇALIŞMA DURUMUNA GÖRE KART RENGİ
-    // ====================================================
+    const normalizedStatus =
+      String(m.durum || "")
+        .trim()
+        .toLocaleLowerCase("tr-TR");
 
-    if (m.durum === "Çalışıyor") {
+    if (normalizedStatus === "çalışıyor") {
 
       card.className =
-        'card status-working';
+        "card status-working";
+
+    } else if (normalizedStatus === "çalışmıyor") {
+
+      card.className =
+        "card status-not-working";
+
+    } else if (normalizedStatus === "girişimci") {
+
+      card.className =
+        "card status-entrepreneur";
+
+    } else {
+
+      card.className =
+        "card";
 
     }
 
-    else if (m.durum === "Çalışmıyor") {
-
-      card.className =
-        'card status-not-working';
-
-    }
-
-    else {
-
-      card.className =
-        'card';
-
-    }
-
-
-    // ====================================================
-    // KART İÇERİĞİ
-    // ====================================================
+    const firstLetter =
+      (m.ad || "?")
+        .trim()
+        .charAt(0)
+        .toLocaleUpperCase("tr-TR");
 
     card.innerHTML = `
 
       <div class="card-top">
 
         <div class="avatar">
-          ${firstLetter}
+          ${escapeHtml(firstLetter)}
         </div>
 
         <div class="status">
-          ${m.durum || '-'}
+          ${escapeHtml(m.durum || "-")}
         </div>
 
       </div>
 
-
       <h3>
-        ${m.ad || 'İsimsiz Mezun'}
+        ${escapeHtml(m.ad || "İsimsiz Mezun")}
       </h3>
 
-
       <div class="dept">
-        ${m.bolum || '-'}
+        ${escapeHtml(m.bolum || "-")}
       </div>
-
 
       <div class="meta">
 
         <div>
-          📍 ${m.sehir || '-'}
+          📍 ${escapeHtml(m.sehir || "-")}
         </div>
 
         <div>
-          🎓 ${m.yil || '-'} Mezunu
+          🎓 ${escapeHtml(m.yil || "-")} Mezunu
         </div>
 
         <div>
-          💼 ${m.kurum || '-'}
+          💼 ${escapeHtml(m.kurum || "-")}
         </div>
 
       </div>
 
-
       <button
         class="detail-btn"
-        onclick="openGraduateDetail(${m.id})"
+        onclick="openGraduateDetail('${escapeHtml(String(m.id || m.firestoreId || ""))}')"
       >
         Detayları Gör
       </button>
 
     `;
-
 
     graduatesContainer.appendChild(card);
 
@@ -691,568 +514,390 @@ function renderGraduatesCards(list) {
 
 }
 
+/* ========================================================
+   DETAY MODALI
+   ======================================================== */
 
-// ========================================================
-// MEZUN DETAY MODALI
-// ========================================================
+window.openGraduateDetail = function(id) {
 
-window.openGraduateDetail = function (id) {
-
-  const m =
+  const graduate =
     localGraduatesData.find(
-      grad => grad.id === id
+      m =>
+        String(m.id) === String(id) ||
+        String(m.firestoreId) === String(id)
     );
 
+  if (!graduate) {
 
-  if (!m) return;
+    console.error("Mezun bulunamadı:", id);
 
+    return;
+
+  }
 
   const firstLetter =
-    m.ad
-      ? m.ad.charAt(0).toUpperCase()
-      : '?';
-
+    (graduate.ad || "?")
+      .trim()
+      .charAt(0)
+      .toLocaleUpperCase("tr-TR");
 
   modalContent.innerHTML = `
 
     <div class="profile-big">
 
-      <div
-        class="avatar"
-        style="
-          width:52px;
-          height:52px;
-          font-size:18px;
-          margin:0 auto;
-          display:grid;
-          place-items:center;
-          border-radius:50%;
-          background:var(--primary);
-          color:white;
-          font-weight:800;
-        "
-      >
-        ${firstLetter}
+      <div class="avatar">
+        ${escapeHtml(firstLetter)}
       </div>
 
-
-      <h2 style="margin:14px 0 4px;">
-        ${m.ad || '-'}
+      <h2>
+        ${escapeHtml(graduate.ad || "İsimsiz Mezun")}
       </h2>
 
-
-      <div
-        class="dept"
-        style="
-          color:var(--primary);
-          font-weight:700;
-          margin-bottom:20px;
-        "
-      >
-        ${m.bolum || '-'}
+      <div class="dept">
+        ${escapeHtml(graduate.bolum || "-")}
       </div>
 
     </div>
-
 
     <div class="profile-list">
 
       <div>
         <strong>Mezuniyet Yılı:</strong>
-        <span>${m.yil || '-'}</span>
+        ${escapeHtml(graduate.yil || "-")}
       </div>
 
-
       <div>
-        <strong>Bulunduğu Şehir:</strong>
-        <span>${m.sehir || '-'}</span>
+        <strong>Şehir:</strong>
+        ${escapeHtml(graduate.sehir || "-")}
       </div>
 
-
       <div>
-        <strong>Sektör / Alan:</strong>
-        <span>${m.sektor || '-'}</span>
+        <strong>Sektör:</strong>
+        ${escapeHtml(graduate.sektor || "-")}
       </div>
 
-
       <div>
-        <strong>Çalışma Durumu:</strong>
-        <span>${m.durum || '-'}</span>
+        <strong>Durum:</strong>
+        ${escapeHtml(graduate.durum || "-")}
       </div>
 
-
       <div>
-        <strong>Kurum / Şirket:</strong>
-        <span>${m.kurum || '-'}</span>
+        <strong>Kurum:</strong>
+        ${escapeHtml(graduate.kurum || "-")}
       </div>
 
-
       <div>
-        <strong>Unvan / Görev:</strong>
-        <span>${m.unvan || '-'}</span>
+        <strong>Unvan:</strong>
+        ${escapeHtml(graduate.unvan || "-")}
       </div>
 
     </div>
 
   `;
 
-
-  modal.classList.remove('hidden');
+  modal.classList.remove("hidden");
 
 };
 
+/* ========================================================
+   FİLTRELERİ TEMİZLE
+   ======================================================== */
 
-// ========================================================
-// ARAMA VE FİLTRE EVENTLERİ
-// ========================================================
+function resetFilters() {
 
-searchInput.addEventListener(
-  'input',
-  filterAndRenderGraduates
-);
+  searchInput.value = "";
 
-departmentFilter.addEventListener(
-  'change',
-  filterAndRenderGraduates
-);
+  departmentFilter.value = "";
 
-yearFilter.addEventListener(
-  'change',
-  filterAndRenderGraduates
-);
+  yearFilter.value = "";
 
-cityFilter.addEventListener(
-  'change',
-  filterAndRenderGraduates
-);
+  cityFilter.value = "";
 
-statusFilter.addEventListener(
-  'change',
-  filterAndRenderGraduates
-);
-
-
-// ========================================================
-// FİLTRELERİ TEMİZLE
-// ========================================================
-
-resetBtn.addEventListener('click', () => {
-
-  searchInput.value = '';
-
-  departmentFilter.value = '';
-
-  yearFilter.value = '';
-
-  cityFilter.value = '';
-
-  statusFilter.value = '';
+  statusFilter.value = "";
 
   filterAndRenderGraduates();
 
-});
+}
 
+/* ========================================================
+   TEMA
+   ======================================================== */
 
-// ========================================================
-// MODAL KAPATMA
-// ========================================================
+function setupTheme() {
 
-closeModal.addEventListener(
-  'click',
-  () => modal.classList.add('hidden')
-);
+  const savedTheme =
+    localStorage.getItem("mezunPortalTheme");
 
-closeAdminModal.addEventListener(
-  'click',
-  () => adminModal.classList.add('hidden')
-);
+  if (savedTheme === "dark") {
 
-closeLoginModal.addEventListener(
-  'click',
-  () => loginModal.classList.add('hidden')
-);
+    document.body.classList.add("dark");
 
+    themeBtn.textContent = "☀";
 
-// ========================================================
-// AÇIK / KOYU TEMA
-// ========================================================
+  } else {
 
-themeBtn.addEventListener('click', () => {
+    themeBtn.textContent = "☾";
+
+  }
+
+}
+
+function toggleTheme() {
+
+  document.body.classList.toggle("dark");
 
   const isDark =
-    document.body.classList.toggle('dark');
-
-
-  themeBtn.textContent =
-    isDark ? '☼' : '☾';
-
+    document.body.classList.contains("dark");
 
   localStorage.setItem(
-    'theme',
-    isDark ? 'dark' : 'light'
+    "mezunPortalTheme",
+    isDark ? "dark" : "light"
   );
 
-});
+  themeBtn.textContent =
+    isDark ? "☀" : "☾";
 
+}
 
-// ========================================================
-// GİRİŞ / ÇIKIŞ AKIŞI
-// ========================================================
+/* ========================================================
+   ADMIN GİRİŞİ
+   ======================================================== */
 
-adminLoginLink.addEventListener(
-  'click',
-  async (e) => {
+async function adminLogin() {
 
-    e.preventDefault();
+  const email =
+    loginEmail.value.trim();
 
+  const password =
+    loginPassword.value;
 
-    if (isAdmin) {
+  if (!email || !password) {
 
-      await signOut(auth);
+    showLoginError(
+      "E-posta ve şifre alanlarını doldurunuz."
+    );
 
-      alert("Çıkış yapıldı.");
+    return;
 
-      return;
-    }
+  }
 
+  btnLogin.disabled = true;
 
-    loginError.style.display =
-      'none';
+  btnLogin.textContent =
+    "Giriş yapılıyor...";
 
-    loginEmail.value = '';
+  try {
 
-    loginPassword.value = '';
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-    loginModal.classList.remove(
-      'hidden'
+    loginError.style.display = "none";
+
+    loginModal.classList.add("hidden");
+
+    adminModal.classList.remove("hidden");
+
+  } catch (error) {
+
+    console.error(
+      "Admin giriş hatası:",
+      error
+    );
+
+    showLoginError(
+      "E-posta veya şifre hatalı."
+    );
+
+  } finally {
+
+    btnLogin.disabled = false;
+
+    btnLogin.textContent =
+      "Giriş Yap";
+
+  }
+
+}
+
+/* ========================================================
+   GİRİŞ HATASI
+   ======================================================== */
+
+function showLoginError(message) {
+
+  loginError.textContent =
+    message;
+
+  loginError.style.display =
+    "block";
+
+}
+
+/* ========================================================
+   FIRESTORE'A YENİ MEZUN EKLE
+   ======================================================== */
+
+async function saveGraduateToDatabase() {
+
+  const name =
+    document.getElementById("admName").value.trim();
+
+  const dept =
+    document.getElementById("admDept").value;
+
+  const year =
+    document.getElementById("admYear").value.trim();
+
+  const city =
+    document.getElementById("admCity").value.trim();
+
+  const sektor =
+    document.getElementById("admSektor").value.trim();
+
+  const status =
+    document.getElementById("admStatus").value;
+
+  const company =
+    document.getElementById("admCompany").value.trim();
+
+  const job =
+    document.getElementById("admJob").value.trim();
+
+  if (
+    !name ||
+    !dept ||
+    !year ||
+    !city ||
+    !sektor ||
+    !status ||
+    !company ||
+    !job
+  ) {
+
+    alert(
+      "Lütfen tüm alanları doldurunuz."
+    );
+
+    return;
+
+  }
+
+  btnSaveToDatabase.disabled = true;
+
+  btnSaveToDatabase.textContent =
+    "⏳ Veritabanına kaydediliyor...";
+
+  try {
+
+    const newId =
+      Date.now();
+
+    const newGraduate = {
+
+      id: newId,
+
+      ad: name,
+
+      bolum: dept,
+
+      yil: year,
+
+      sehir: city,
+
+      sektor: sektor,
+
+      durum: status,
+
+      kurum: company,
+
+      unvan: job
+
+    };
+
+    await addDoc(
+      collection(db, "mezunlar"),
+      newGraduate
+    );
+
+    alert(
+      "Mezun kaydı başarıyla veritabanına eklendi."
+    );
+
+    document.getElementById("admName").value = "";
+
+    document.getElementById("admYear").value = "";
+
+    document.getElementById("admCity").value = "";
+
+    document.getElementById("admSektor").value = "";
+
+    document.getElementById("admCompany").value = "";
+
+    document.getElementById("admJob").value = "";
+
+    adminModal.classList.add("hidden");
+
+    await fetchGraduatesFromDatabase();
+
+  } catch (error) {
+
+    console.error(
+      "Mezun kaydetme hatası:",
+      error
+    );
+
+    alert(
+      "Kayıt sırasında hata oluştu. Konsolu kontrol ediniz."
+    );
+
+  } finally {
+
+    btnSaveToDatabase.disabled = false;
+
+    btnSaveToDatabase.textContent =
+      "💾 Veritabanına Doğrudan Kaydet (Kalıcı)";
+
+  }
+
+}
+
+/* ========================================================
+   AUTH DURUMU
+   ======================================================== */
+
+onAuthStateChanged(auth, user => {
+
+  if (user) {
+
+    console.log(
+      "Firebase kullanıcısı giriş yaptı:",
+      user.email
+    );
+
+  } else {
+
+    console.log(
+      "Firebase kullanıcısı giriş yapmadı."
     );
 
   }
-);
 
+});
 
-// ========================================================
-// YÖNETİCİ GİRİŞİ
-// ========================================================
+/* ========================================================
+   HTML GÜVENLİK / ESCAPE
+   ======================================================== */
 
-btnLogin.addEventListener(
-  'click',
-  async () => {
+function escapeHtml(value) {
 
-    const email =
-      loginEmail.value.trim();
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 
-
-    const password =
-      loginPassword.value;
-
-
-    if (!email || !password) {
-
-      loginError.textContent =
-        "Lütfen e-posta ve şifre girin.";
-
-      loginError.style.display =
-        'block';
-
-      return;
-    }
-
-
-    try {
-
-      btnLogin.disabled = true;
-
-      btnLogin.textContent =
-        "Giriş yapılıyor...";
-
-
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-
-      loginModal.classList.add(
-        'hidden'
-      );
-
-
-      setTimeout(() => {
-
-        if (isAdmin) {
-
-          adminModal.classList.remove(
-            'hidden'
-          );
-
-        }
-
-      }, 600);
-
-
-    } catch (err) {
-
-      console.error(
-        "Giriş hatası:",
-        err.message
-      );
-
-
-      loginError.textContent =
-        "Giriş başarısız: E-posta veya şifre hatalı.";
-
-
-      loginError.style.display =
-        'block';
-
-
-    } finally {
-
-      btnLogin.disabled = false;
-
-      btnLogin.textContent =
-        "Giriş Yap";
-
-    }
-
-  }
-);
-
-
-// ========================================================
-// YENİ MEZUN KAYDI EKLEME
-// ========================================================
-
-btnSaveToDatabase.addEventListener(
-  'click',
-  async () => {
-
-    if (!isAdmin) {
-
-      alert(
-        "Bu işlemi yapmak için yönetici girişi yapmalısınız."
-      );
-
-      return;
-    }
-
-
-    const name =
-      document
-        .getElementById('admName')
-        .value
-        .trim();
-
-
-    const dept =
-      document
-        .getElementById('admDept')
-        .value;
-
-
-    const year =
-      parseInt(
-        document
-          .getElementById('admYear')
-          .value
-          .trim()
-      );
-
-
-    const city =
-      document
-        .getElementById('admCity')
-        .value
-        .trim();
-
-
-    const sektor =
-      document
-        .getElementById('admSektor')
-        .value
-        .trim();
-
-
-    const status =
-      document
-        .getElementById('admStatus')
-        .value;
-
-
-    const company =
-      document
-        .getElementById('admCompany')
-        .value
-        .trim();
-
-
-    const job =
-      document
-        .getElementById('admJob')
-        .value
-        .trim();
-
-
-    if (
-      !name ||
-      !year ||
-      !city ||
-      !sektor ||
-      !company ||
-      !job
-    ) {
-
-      alert(
-        "Lütfen zorunlu alanların (*) tümünü doldurunuz!"
-      );
-
-      return;
-    }
-
-
-    try {
-
-      btnSaveToDatabase.disabled =
-        true;
-
-
-      btnSaveToDatabase.textContent =
-        "Buluta Kaydediliyor...";
-
-
-      // ==================================================
-      // YENİ ID OLUŞTUR
-      // ==================================================
-
-      const maxId =
-        localGraduatesData.reduce(
-          (max, m) =>
-            Math.max(
-              max,
-              Number(m.id) || 0
-            ),
-          0
-        );
-
-
-      const newId =
-        maxId + 1;
-
-
-      // ==================================================
-      // YENİ MEZUN VERİSİ
-      // ==================================================
-
-      const newGraduate = {
-
-        id: newId,
-
-        ad: name,
-
-        bolum: dept,
-
-        yil: year,
-
-        sehir: city,
-
-        sektor: sektor,
-
-        durum: status,
-
-        kurum: company,
-
-        unvan: job
-
-      };
-
-
-      // ==================================================
-      // FIRESTORE'A KAYDET
-      // ==================================================
-
-      await addDoc(
-        collection(db, 'mezunlar'),
-        newGraduate
-      );
-
-
-      alert(
-        "Harika! Yeni mezun kaydı bulut veritabanınıza başarıyla doğrudan eklendi."
-      );
-
-
-      // ==================================================
-      // FORMU TEMİZLE
-      // ==================================================
-
-      document.getElementById(
-        'admName'
-      ).value = '';
-
-
-      document.getElementById(
-        'admYear'
-      ).value = '';
-
-
-      document.getElementById(
-        'admCity'
-      ).value = '';
-
-
-      document.getElementById(
-        'admSektor'
-      ).value = '';
-
-
-      document.getElementById(
-        'admCompany'
-      ).value = '';
-
-
-      document.getElementById(
-        'admJob'
-      ).value = '';
-
-
-      adminModal.classList.add(
-        'hidden'
-      );
-
-
-      // ==================================================
-      // VERİLERİ YENİDEN ÇEK
-      // ==================================================
-
-      await fetchGraduatesFromDatabase();
-
-
-    } catch (err) {
-
-      console.error(
-        "Kayıt esnasında hata oluştu:",
-        err.message
-      );
-
-
-      alert(
-        "Veritabanına kaydedilirken bir hata oluştu: " +
-        err.message
-      );
-
-
-    } finally {
-
-      btnSaveToDatabase.disabled =
-        false;
-
-
-      btnSaveToDatabase.textContent =
-        "💾 Veritabanına Doğrudan Kaydet (Kalıcı)";
-
-    }
-
-  }
-);
+}
